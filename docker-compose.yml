@@ -1,0 +1,59 @@
+version: '3.9'
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - user-service
+      - course-service
+
+  auth-service:
+    build: ./backend/auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      JWT_SECRET: "mysecret"
+      REDIS_URL: "redis://redis:6379"
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
+    depends_on:
+      - redis
+      - rabbitmq
+
+  user-service:
+    build: ./backend/user-service
+    ports:
+      - "3002:3002"
+    environment:
+      MONGO_URL: "mongodb://mongo:27017/eduapp"
+    depends_on:
+      - mongo
+
+  course-service:
+    build: ./backend/course-service
+    ports:
+      - "3003:3003"
+    environment:
+      MONGO_URL: "mongodb://mongo:27017/eduapp"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
