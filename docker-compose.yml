@@ -1,4 +1,5 @@
 version: '3.9'
+
 services:
   frontend:
     build: ./frontend
@@ -17,7 +18,9 @@ services:
       JWT_SECRET: "mysecret"
       REDIS_URL: "redis://redis:6379"
       RABBITMQ_URL: "amqp://rabbitmq:5672"
+      MONGO_URL: "mongodb://mongo:27017/eduapp"   # Add if auth-service uses DB
     depends_on:
+      - mongo
       - redis
       - rabbitmq
 
@@ -44,12 +47,16 @@ services:
     container_name: mongo
     ports:
       - "27017:27017"
+    volumes:
+      - mongo-data:/data/db   # persist DB
 
   redis:
     image: redis:7
     container_name: redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis-data:/data     # persist Redis
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -57,3 +64,10 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq   # persist messages
+
+volumes:
+  mongo-data:
+  redis-data:
+  rabbitmq-data:
